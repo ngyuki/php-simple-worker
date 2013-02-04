@@ -21,7 +21,7 @@ class SimpleWorkerServer extends SimpleWorkerAbstract
     public function init()
     {
         ASSERT(' $this->_sigset === null ');
-        ASSERT(' $this->_fp === null ');
+        ASSERT(' $this->_pidlock === null ');
 
         // ログ
         $pid = posix_getpid();
