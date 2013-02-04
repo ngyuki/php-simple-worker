@@ -5,6 +5,8 @@ Requirements
 ------------
 
 - PHP 5.3.3 or later
+- php-posix
+- php-pcntl
 
 License
 -------
