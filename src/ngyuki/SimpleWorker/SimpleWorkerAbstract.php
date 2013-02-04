@@ -5,7 +5,7 @@ abstract class SimpleWorkerAbstract
 {
     protected $_pidfile;
     protected $_logger;
-    
+
     /**
      * コンストラクタ
      *
@@ -22,21 +22,22 @@ abstract class SimpleWorkerAbstract
             $hash = md5(__DIR__);
             $this->_pidfile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "SimpleWorker-$hash.pid";
         }
-        
+
         $this->_logger = function () {};
     }
-    
+
     /**
      * ロガーを設定
      *
      * @param callable $logger
      */
-    public function setLogger(callable $logger)
+    public function setLogger($logger)
     {
+        ASSERT('is_callable($logger)');
         $this->_logger = $logger;
         return $this;
     }
-    
+
     /**
      * PIDファイル名を取得
      *
@@ -46,7 +47,7 @@ abstract class SimpleWorkerAbstract
     {
         return $this->_pidfile;
     }
-    
+
     /**
      * 動作ログ
      *
