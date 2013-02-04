@@ -1,7 +1,7 @@
 <?php
 namespace ngyuki\SimpleWorker;
 
-class SimpleWorkerServer extends SimpleWorkerAbstract
+class SimpleWorker extends SimpleWorkerAbstract
 {
     private $_inited = false;
     private $_sigset;
@@ -25,7 +25,7 @@ class SimpleWorkerServer extends SimpleWorkerAbstract
 
         // ログ
         $pid = posix_getpid();
-        $this->_log("init server [$pid => $this->_pidfile]");
+        $this->_log("init worker [$pid => $this->_pidfile]");
 
         // PIDファイルをロック
         $this->_pidlock = new PidFileFlock($this->_pidfile, $pid);
@@ -60,7 +60,7 @@ class SimpleWorkerServer extends SimpleWorkerAbstract
 
             // ログ
             $pid = posix_getpid();
-            $this->_log("exit server [$pid]");
+            $this->_log("exit worker [$pid]");
         }
     }
 
@@ -94,6 +94,22 @@ class SimpleWorkerServer extends SimpleWorkerAbstract
                     case SIGUSR2:
                         return true;
                 }
+            }
+        }
+    }
+
+    /**
+     * 送信
+     */
+    public function send()
+    {
+        if (is_readable($this->_pidfile))
+        {
+            $pid = (int)file_get_contents($this->_pidfile);
+
+            if ($pid > 0)
+            {
+                posix_kill($pid, SIGUSR2);
             }
         }
     }

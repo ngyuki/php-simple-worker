@@ -1,17 +1,16 @@
 <?php
 namespace ngyuki\Tests;
 
-use ngyuki\SimpleWorker\SimpleWorkerServer;
-use ngyuki\SimpleWorker\SimpleWorkerClient;
+use ngyuki\SimpleWorker\SimpleWorker;
 
-class SimpleWorkerServerTest extends \PHPUnit_Framework_TestCase
+class SimpleWorkerTest extends \PHPUnit_Framework_TestCase
 {
     private $fn;
-    private $server;
+    private $worker;
 
     public function setUp()
     {
-        $this->fn = sys_get_temp_dir() . DIRECTORY_SEPARATOR .  'SimpleWorker-SimpleWorkerServerTest.pid';
+        $this->fn = sys_get_temp_dir() . DIRECTORY_SEPARATOR .  'SimpleWorker-SimpleWorkerTest.pid';
 
         if (file_exists($this->fn))
         {
@@ -21,9 +20,9 @@ class SimpleWorkerServerTest extends \PHPUnit_Framework_TestCase
 
     protected function tearDown()
     {
-        if ($this->server)
+        if ($this->worker)
         {
-            $this->server->fin();
+            $this->worker->fin();
         }
     }
 
@@ -32,11 +31,11 @@ class SimpleWorkerServerTest extends \PHPUnit_Framework_TestCase
      */
     public function test()
     {
-        $this->server = new SimpleWorkerServer($this->fn);
-        $this->server->init();
+        $this->worker = new SimpleWorker($this->fn);
+        $this->worker->init();
 
-        $this->assertEquals($this->server->getPidFile(), $this->fn);
-        $this->assertEquals(file_get_contents($this->server->getPidFile()), getmypid());
+        $this->assertEquals($this->worker->getPidFile(), $this->fn);
+        $this->assertEquals(file_get_contents($this->worker->getPidFile()), getmypid());
     }
 
     /**
@@ -44,10 +43,10 @@ class SimpleWorkerServerTest extends \PHPUnit_Framework_TestCase
      */
     public function test_pidfile_not_specified()
     {
-        $this->server = new SimpleWorkerServer();
-        $this->server->init();
+        $this->worker = new SimpleWorker();
+        $this->worker->init();
 
-        $this->assertEquals(file_get_contents($this->server->getPidFile()), getmypid());
+        $this->assertEquals(file_get_contents($this->worker->getPidFile()), getmypid());
     }
 
     /**
@@ -57,12 +56,12 @@ class SimpleWorkerServerTest extends \PHPUnit_Framework_TestCase
     {
         $logs = array();
 
-        $this->server = new SimpleWorkerServer();
-        $this->server->setLogger(function ($log) use (&$logs) { $logs[] = $log;} );
-        $this->server->init();
+        $this->worker = new SimpleWorker();
+        $this->worker->setLogger(function ($log) use (&$logs) { $logs[] = $log;} );
+        $this->worker->init();
 
         list ($log) = $logs;
-        $this->assertContains("init server", $log);
+        $this->assertContains("init worker", $log);
     }
 
     /**
@@ -70,13 +69,13 @@ class SimpleWorkerServerTest extends \PHPUnit_Framework_TestCase
      */
     public function wait()
     {
-        $this->server = new SimpleWorkerServer();
-        $this->server->init();
+        $this->worker = new SimpleWorker();
+        $this->worker->init();
 
         // 開始時刻
         $time = microtime(true);
 
-        $ret = $this->server->wait(1);
+        $ret = $this->worker->wait(1);
 
         // 戻り値は true (継続)
         $this->assertTrue($ret);
@@ -91,8 +90,8 @@ class SimpleWorkerServerTest extends \PHPUnit_Framework_TestCase
      */
     public function wait_term()
     {
-        $this->server = new SimpleWorkerServer();
-        $this->server->init();
+        $this->worker = new SimpleWorker();
+        $this->worker->init();
 
         // TERM シグナル
         posix_kill(getmypid(), SIGTERM);
@@ -100,7 +99,7 @@ class SimpleWorkerServerTest extends \PHPUnit_Framework_TestCase
         // 開始時刻
         $time = microtime(true);
 
-        $ret = $this->server->wait(1);
+        $ret = $this->worker->wait(1);
 
         // 戻り値は false (終了)
         $this->assertFalse($ret);
@@ -114,8 +113,8 @@ class SimpleWorkerServerTest extends \PHPUnit_Framework_TestCase
      */
     public function wait_usr2()
     {
-        $this->server = new SimpleWorkerServer();
-        $this->server->init();
+        $this->worker = new SimpleWorker();
+        $this->worker->init();
 
         // TERM シグナル
         posix_kill(getmypid(), SIGUSR2);
@@ -123,7 +122,7 @@ class SimpleWorkerServerTest extends \PHPUnit_Framework_TestCase
         // 開始時刻
         $time = microtime(true);
 
-        $ret = $this->server->wait(1);
+        $ret = $this->worker->wait(1);
 
         // 戻り値は true (継続)
         $this->assertTrue($ret);
@@ -137,16 +136,16 @@ class SimpleWorkerServerTest extends \PHPUnit_Framework_TestCase
      */
     public function fin()
     {
-        $this->server = new SimpleWorkerServer();
+        $this->worker = new SimpleWorker();
 
-        $fn = $this->server->getPidFile();
+        $fn = $this->worker->getPidFile();
 
-        $this->server->init();
+        $this->worker->init();
 
         $this->assertFileExists($fn);
 
-        $this->server->fin();
-        $this->server = null;
+        $this->worker->fin();
+        $this->worker = null;
 
         $this->assertFileNotExists($fn);
     }
@@ -156,15 +155,15 @@ class SimpleWorkerServerTest extends \PHPUnit_Framework_TestCase
      */
     public function destruct()
     {
-        $this->server = new SimpleWorkerServer();
+        $this->worker = new SimpleWorker();
 
-        $fn = $this->server->getPidFile();
+        $fn = $this->worker->getPidFile();
 
-        $this->server->init();
+        $this->worker->init();
 
         $this->assertFileExists($fn);
 
-        $this->server = null;
+        $this->worker = null;
 
         gc_collect_cycles();
 
@@ -176,16 +175,16 @@ class SimpleWorkerServerTest extends \PHPUnit_Framework_TestCase
      */
     public function client()
     {
-        $this->server = new SimpleWorkerServer();
-        $this->server->init();
+        $this->worker = new SimpleWorker();
+        $this->worker->init();
 
-        $client = new SimpleWorkerClient();
+        $client = new SimpleWorker();
         $client->send();
 
         // 開始時刻
         $time = microtime(true);
 
-        $ret = $this->server->wait(1);
+        $ret = $this->worker->wait(1);
 
         // 戻り値は true (継続)
         $this->assertTrue($ret);

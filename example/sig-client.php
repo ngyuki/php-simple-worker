@@ -9,5 +9,5 @@ foreach (array(__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoloa
     }
 }
 
-$client = new SimpleWorkerClient();
+$client = new SimpleWorker();
 $client->send();

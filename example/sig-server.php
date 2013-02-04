@@ -9,7 +9,7 @@ foreach (array(__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoloa
     }
 }
 
-$server = new SimpleWorkerServer();
+$server = new SimpleWorker();
 
 $server->setLogger(function ($log) {
     fputs(STDERR, "$log\n");
