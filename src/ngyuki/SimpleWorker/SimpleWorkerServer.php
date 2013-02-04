@@ -31,7 +31,7 @@ class SimpleWorkerServer extends SimpleWorkerAbstract
         $this->_pidlock = new PidFileFlock($this->_pidfile, $pid);
 
         // シグナルのセット
-        $this->_sigset = [SIGTERM, SIGINT, SIGHUP, SIGUSR2];
+        $this->_sigset = array(SIGTERM, SIGINT, SIGHUP, SIGUSR2);
         pcntl_sigprocmask(SIG_BLOCK, $this->_sigset);
 
         // シグナルの無視設定
