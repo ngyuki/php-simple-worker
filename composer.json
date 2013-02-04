@@ -1,0 +1,29 @@
+{
+    "repositories": [
+        {
+            "packagist": false
+        }
+    ],
+    
+    "name": "ngyuki/php-simple-worker",
+    "type": "library",
+    "description": "php-simple-worker",
+    "keywords": [],
+    "homepage": "https://github.com/ngyuki/php-simple-worker",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "tsyk goto",
+            "email": "ngyuki.ts@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "ext-posix": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "ngyuki\\SimpleWorker": "src/"
+        }
+    }
+}
