@@ -8,6 +8,17 @@ class SimpleWorker extends SimpleWorkerAbstract
     private $_pidlock;
 
     /**
+     * コンストラクタ
+     */
+    public function __construct()
+    {
+        if (!defined('SIGUSR2'))
+        {
+            define('SIGUSR2', 12);
+        }
+    }
+
+    /**
      * デストラクタ
      */
     public function __destruct()
@@ -106,11 +117,20 @@ class SimpleWorker extends SimpleWorkerAbstract
         if (is_readable($this->_pidfile))
         {
             $pid = (int)file_get_contents($this->_pidfile);
-
+            
             if ($pid > 0)
             {
+                $this->_log("sending signal to [$pid]");
                 posix_kill($pid, SIGUSR2);
             }
+            else
+            {
+                $this->_log("invalid pid [$pid]");
+            }
+        }
+        else
+        {
+            $this->_log("not readable [$this->_pidfile]");
         }
     }
 }
