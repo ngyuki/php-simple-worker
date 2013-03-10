@@ -36,7 +36,6 @@ class SimpleWorker extends SimpleWorkerAbstract
 
         // シグナルの無視設定
         pcntl_signal(SIGUSR2, SIG_IGN);
-        pcntl_signal(SIGCHLD, SIG_IGN);
     }
 
     /**
